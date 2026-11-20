@@ -1,0 +1,33 @@
+# Baseline CI for an empty repository.
+# There is no package manager, linter, or type checker yet, so this workflow
+# does not install dependencies and does not cache anything. Add a setup-*
+# step and actions/cache (keyed on the lockfile) in the same PR that introduces
+# the toolchain. Superseded runs are cancelled so GitHub Free minutes are not
+# spent twice on the same branch.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Smoke check
+        run: bash scripts/ci-smoke.sh
